@@ -3,31 +3,23 @@ import os
 import sys
 
 from PySide6.QtCore import Qt, QTimer
-from PySide6.QtUiTools import loadUiType
-from PySide6.QtWidgets import QApplication, QMenu, QSystemTrayIcon
+# from PySide6.QtUiTools import loadUiType
+from PySide6.QtWidgets import QApplication, QMainWindow, QMenu, QSystemTrayIcon
 from PySide6.QtGui import QAction, QIcon, QFontMetrics
 
-
-def UiClass(path):
-    formClass, widgetClass = loadUiType(path)
-    name = os.path.basename(path).replace(".", "_")
-
-    def __init__(self, parent=None):
-        widgetClass.__init__(self, parent)
-        formClass.setupUi(self, self)
-
-    return type(name, (widgetClass, formClass), {"__init__": __init__})
+from design import Ui_MainWindow
 
 
-class TransparentWidget(UiClass("design.ui")):
+class TransparentWidget(QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        self.setupUi(self)
 
         self._old_pos = None
 
         self.tray_icon = QSystemTrayIcon(self)
         self.tray_icon.setIcon(
-            QIcon(os.path.join(os.path.dirname(__file__), "assets/school.png"))
+            QIcon(os.path.join(os.path.dirname(__file__), "assets/icon.png"))
         )
 
         self.tray_menu = QMenu()
