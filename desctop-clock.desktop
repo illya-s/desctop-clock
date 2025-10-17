@@ -1,0 +1,8 @@
+[Desktop Entry]
+Name=DesctopClock
+Comment=PySide6 Desktop Clock
+Exec=/usr/bin/desctop-clock
+Icon=/usr/share/desctop-clock/assets/icon.png
+Terminal=false
+Type=Application
+Categories=Utility;
