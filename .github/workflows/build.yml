@@ -4,7 +4,7 @@ on:
   push:
     branches: [ main ]
   release:
-    types: [ created ]
+    types: [created]
 
 jobs:
   build-linux:
@@ -37,11 +37,11 @@ jobs:
           assets/=/usr/share/"$PROJECT_NAME"/assets \
           desctop-clock.desktop=/usr/share/applications/"$PROJECT_NAME".desktop
 
-      - name: Upload Linux artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Linux .deb to release
+        uses: ncipollo/release-action@v1
         with:
-          name: linux-build
-          path: dist/
+          artifacts: dist/*.deb
+          tag: ${{ github.ref_name }}
 
   build-windows:
     runs-on: windows-latest
@@ -60,11 +60,11 @@ jobs:
         run: |
           pyinstaller --noconfirm --onefile --windowed --add-data "assets;assets" --icon "assets/icon.ico" main.py
 
-      - name: Upload Windows artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload Windows .exe to release
+        uses: ncipollo/release-action@v1
         with:
-          name: windows-build
-          path: dist/
+          artifacts: dist/*.exe
+          tag: ${{ github.ref_name }}
 
   build-macos:
     runs-on: macos-latest
@@ -91,8 +91,8 @@ jobs:
           PROJECT_NAME=$(grep '^name\s*=' pyproject.toml | sed 's/name\s*=\s*"\(.*\)"/\1/')
           hdiutil create -volname "$PROJECT_NAME" -srcfolder dist/ -ov -format UDZO "$PROJECT_NAME.dmg"
 
-      - name: Upload macOS artifact
-        uses: actions/upload-artifact@v4
+      - name: Upload macOS .dmg to release
+        uses: ncipollo/release-action@v1
         with:
-            name: macos-build
-            path: dist/
+          artifacts: dist/*.dmg
+          tag: ${{ github.ref_name }}
