@@ -31,12 +31,11 @@ jobs:
 
       - name: Build .deb package
         run: |
-          PROJECT_NAME=$(grep '^name\s*=' pyproject.toml | sed 's/name\s*=\s*"\(.*\)"/\1/')
-          PROJECT_VERSION=$(grep '^version\s*=' pyproject.toml | sed 's/version\s*=\s*"\(.*\)"/\1/')
-          fpm -s dir -t deb -n "$PROJECT_NAME" -v "$PROJECT_VERSION" \
-          dist/main=/usr/bin/"$PROJECT_NAME"-clock \
-          assets/=/usr/share/"$PROJECT_NAME"/assets \
-          desctop-clock.desktop=/usr/share/applications/"$PROJECT_NAME".desktop
+          TAG_VERSION=${GITHUB_REF_NAME#v}
+          fpm -s dir -t deb -n "desctop-clock" -v "$TAG_VERSION" \
+          dist/main=/usr/bin/desctop-clock \
+          assets/=/usr/share/desctop-clock/assets \
+          desctop-clock.desktop=/usr/share/applications/desctop-clock.desktop
 
       - name: Upload Linux .deb to release
         uses: ncipollo/release-action@v1
