@@ -58,10 +58,7 @@ jobs:
 
       - name: Build Windows executable
         run: |
-          pyinstaller --noconfirm --onefile --windowed \
-          --add-data "assets;assets" \
-          --icon "assets/icon.ico" \
-          main.py
+          pyinstaller --noconfirm --onefile --windowed --add-data "assets;assets" --icon "assets/icon.ico" main.py
 
       - name: Upload Windows artifact
         uses: actions/upload-artifact@v4
