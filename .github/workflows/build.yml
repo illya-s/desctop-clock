@@ -1,0 +1,101 @@
+name: Build Desktop App
+
+on:
+  push:
+    branches: [ main ]
+  release:
+    types: [ created ]
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: |
+          pip install pyinstaller fpm
+
+      - name: Build Linux executable
+        run: |
+          pyinstaller --noconfirm --onefile --windowed \
+          --add-data "assets:assets" \
+          --icon "assets/icon.png" \
+          main.py
+
+      - name: Build .deb package
+        run: |
+          PROJECT_NAME=$(grep '^name\s*=' pyproject.toml | sed 's/name\s*=\s*"\(.*\)"/\1/')
+          PROJECT_VERSION=$(grep '^version\s*=' pyproject.toml | sed 's/version\s*=\s*"\(.*\)"/\1/')
+          fpm -s dir -t deb -n "$PROJECT_NAME" -v "$PROJECT_VERSION" \
+          dist/main=/usr/bin/"$PROJECT_NAME"-clock \
+          assets/=/usr/share/"$PROJECT_NAME"/assets \
+          desctop-clock.desktop=/usr/share/applications/"$PROJECT_NAME".desktop
+
+      - name: Upload Linux artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: linux-build
+          path: dist/
+
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Build Windows executable
+        run: |
+          pyinstaller --noconfirm --onefile --windowed \
+          --add-data "assets;assets" \
+          --icon "assets/icon.ico" \
+          main.py
+
+      - name: Upload Windows artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: windows-build
+          path: dist/
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: 3.12
+
+      - name: Install dependencies
+        run: pip install pyinstaller
+
+      - name: Build macOS executable
+        run: |
+          pyinstaller --noconfirm --onefile --windowed \
+          --add-data "assets:assets" \
+          --icon "assets/icon.icns" \
+          main.py
+
+      - name: Create DMG
+        run: |
+          PROJECT_NAME=$(grep '^name\s*=' pyproject.toml | sed 's/name\s*=\s*"\(.*\)"/\1/')
+          hdiutil create -volname "$PROJECT_NAME" -srcfolder dist/ -ov -format UDZO "$PROJECT_NAME.dmg"
+
+      - name: Upload macOS artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: macos-build
+          path: dist/
